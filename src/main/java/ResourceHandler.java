@@ -9,54 +9,57 @@ import java.util.LinkedList;
 import java.util.Map;
 
 public class ResourceHandler {
-    private static final String TARGET_FILE_PATH = System.getProperty("user.dir") + "/backup";
-    private static final long timeLimit = 13000L;
-    private static String SOURCE_FILE_PATH = "";
+    private String sourceFilePath = "";
+    private String targetFilePath = "";
+    private long timeLimit = 0L;
 
-    public static void init(String sourceFilePath){
-        SOURCE_FILE_PATH = sourceFilePath;
+    public ResourceHandler(String sourceFilePath, String targetFilePath, long timeLimit){
+        this.targetFilePath = targetFilePath;
+        this.sourceFilePath = sourceFilePath;
+        this.timeLimit = timeLimit;
+        createDirIfNotExists();
     }
 
-    public static void doUpdate() throws IOException {
-        Map<String, File> sourceMap = getAllFileByPath(SOURCE_FILE_PATH);
-        Map<String, File> targetMap = getAllFileByPath(TARGET_FILE_PATH);
+    public void doUpdate() throws IOException {
+        Map<String, File> sourceMap = getAllFileByPath(sourceFilePath);
+        Map<String, File> targetMap = getAllFileByPath(targetFilePath);
         doCopy(sourceMap, targetMap);
         doCancel(targetMap);
     }
 
-    private static void doCancel(Map<String, File> targetMap) throws IOException {
+    private void doCancel(Map<String, File> targetMap) throws IOException {
         for (Map.Entry<String, File> entry : targetMap.entrySet()){
             File file = entry.getValue();
-            if(creatMoreThan(entry.getValue(), timeLimit)){
+            if(createMoreThan(entry.getValue())){
                 file.delete();
             }
         }
     }
 
-    private static boolean creatMoreThan(File file, long limit) throws IOException {
+    private boolean createMoreThan(File file) throws IOException {
         BasicFileAttributes basicFileAttributes = Files.readAttributes(file.toPath(),BasicFileAttributes.class);
-        return System.currentTimeMillis() - basicFileAttributes.creationTime().toMillis() > limit;
+        return System.currentTimeMillis() - basicFileAttributes.creationTime().toMillis() > timeLimit;
     }
 
-    private static void doCopy(Map<String, File> sourceMap, Map<String, File> targetMap) throws IOException {
+    private void doCopy(Map<String, File> sourceMap, Map<String, File> targetMap) throws IOException {
         if(0 == sourceMap.size()) {
             return;
         }
         for (Map.Entry<String, File> entry:sourceMap.entrySet()) {
-            if(! targetMap.containsKey(entry.getKey()) && ! creatMoreThan(entry.getValue(), timeLimit)){
-                FileUtils.copyFile(entry.getValue(), new File(TARGET_FILE_PATH + "/" + entry.getKey()));
+            if(! targetMap.containsKey(entry.getKey()) && ! createMoreThan(entry.getValue())){
+                FileUtils.copyFile(entry.getValue(), new File(targetFilePath + "/" + entry.getKey()));
             }
         }
     }
 
-    public static void createDirIfNotExists(){
-        File dir = new File(TARGET_FILE_PATH);
+    private void createDirIfNotExists(){
+        File dir = new File(targetFilePath);
         if (! dir.exists()) {
             dir.mkdirs();
         }
     }
 
-    private static Map<String, File> getAllFileByPath(String path) {
+    private Map<String, File> getAllFileByPath(String path) {
         int fileNum = 0, folderNum = 0;
         Map<String, File> resultMap = new HashMap<>();
         File file = new File(path);
