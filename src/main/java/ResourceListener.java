@@ -6,16 +6,16 @@ import java.util.List;
 
 class ResourceListener implements Runnable {
     private WatchService service;
-    private String rootPath;
+    private String sourceFilePath;
     private ResourceHandler resourceHandler;
 
     public WatchService getService() {
         return service;
     }
 
-    public ResourceListener(WatchService service, String rootPath, ResourceHandler resourceHandler) {
+    public ResourceListener(WatchService service, String sourceFilePath, ResourceHandler resourceHandler) {
         this.service = service;
-        this.rootPath = rootPath;
+        this.sourceFilePath = sourceFilePath;
         this.resourceHandler = resourceHandler;
     }
 
@@ -28,7 +28,7 @@ class ResourceListener implements Runnable {
                 for (WatchEvent<?> event : watchEvents) {
 
                     //TODO 根据事件类型采取不同的操作。。。。。。。
-                    System.out.println("[" + rootPath + "\\" + event.context() + "]文件发生了[" + event.kind() + "]事件" + event.count());
+                    System.out.println("[" + sourceFilePath + "\\" + event.context() + "]文件发生了[" + event.kind() + "]事件" + event.count());
                     resourceHandler.doUpdate();
                 }
                 watchKey.reset();
