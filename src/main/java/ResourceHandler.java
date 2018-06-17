@@ -38,7 +38,10 @@ public class ResourceHandler {
 
     private boolean createMoreThan(File file) throws IOException {
         BasicFileAttributes basicFileAttributes = Files.readAttributes(file.toPath(),BasicFileAttributes.class);
-        return System.currentTimeMillis() - basicFileAttributes.creationTime().toMillis() > timeLimit;
+        long timeNow = System.currentTimeMillis();
+        long timeCreated = basicFileAttributes.creationTime().toMillis();
+
+        return timeNow - timeCreated > timeLimit;
     }
 
     private void doCopy(Map<String, File> sourceMap, Map<String, File> targetMap) throws IOException {
