@@ -24,13 +24,13 @@ public class ResourceHandler {
         Map<String, File> sourceMap = getAllFileByPath(sourceFilePath);
         Map<String, File> targetMap = getAllFileByPath(targetFilePath);
         doCopy(sourceMap, targetMap);
-        doCancel(targetMap);
+        doCancel(sourceMap, targetMap);
     }
 
-    private void doCancel(Map<String, File> targetMap) throws IOException {
+    private void doCancel(Map<String, File> sourceMap, Map<String, File> targetMap) throws IOException {
         for (Map.Entry<String, File> entry : targetMap.entrySet()){
             File file = entry.getValue();
-            if(createMoreThan(entry.getValue())){
+            if(sourceMap.containsKey(entry.getKey()) && createMoreThan(entry.getValue())){
                 file.delete();
             }
         }
